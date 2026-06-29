@@ -26,6 +26,8 @@ jobs:
 
       - name: Start New Container
         run: |
-          docker run -d \
-          --name nodejs-todo \
-          -p 3000:3000 \ -e MONGO_DB_URI="${{ secrets.MONGO_DB_URI }}"/${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+         docker run -d \
+         --name nodejs-todo \
+         -p 3000:3000 \
+         -e MONGO_DB_URI="${{ secrets.MONGO_DB_URI }}" \
+         ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
