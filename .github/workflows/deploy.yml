@@ -1,0 +1,31 @@
+name: Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["Build and Push to ECR"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+      - name: Pull Latest Image
+        run: |
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/nodejs/to-do:latest
+      
+      - name: Stop Existing Container
+        run: |
+          docker stop nodejs-todo || true
+          docker rm nodejs-todo || true
+
+      - name: Start New Container
+        run: |
+          docker run -d \
+          --name nodejs-todo \
+          -p 3000:3000 \ -e MONGO_DB_URI="${{ secrets.MONGO_DB_URI }}"/${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
